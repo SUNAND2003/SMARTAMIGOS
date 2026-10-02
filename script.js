@@ -5,7 +5,7 @@ const rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const hd=$('#hd'),blobs=$$('.blob'),st=$('#steps');
 addEventListener('scroll',()=>{const y=scrollY;hd.classList.toggle('s',y>40);
  if(!rm)blobs.forEach(b=>b.style.transform=`translateY(${y*b.dataset.p}px)`);
- const r=st.getBoundingClientRect(),p=Math.min(1,Math.max(0,(innerHeight*.8-r.top)/(r.height+innerHeight*.3)));st.style.setProperty('--w',(p*100)+'%')},{passive:true});
+ if(st){const r=st.getBoundingClientRect(),p=Math.min(1,Math.max(0,(innerHeight*.8-r.top)/(r.height+innerHeight*.3)));st.style.setProperty('--w',(p*100)+'%')}},{passive:true});
 // mobile menu
 const bg=$('#bg'),mob=$('#mob');
 const tog=o=>{bg.classList.toggle('o',o);mob.classList.toggle('o',o);bg.setAttribute('aria-expanded',o);document.documentElement.classList.toggle('lock',o);document.body.classList.toggle('lock',o)};
@@ -23,17 +23,23 @@ $$('.rv,[data-n],#bars').forEach((el,i)=>{if(el.matches('.card,.pk>div,.bl>artic
 // why accordion
 const wb=$$('#why button');wb.forEach(b=>{const on=()=>{wb.forEach(x=>x.classList.remove('a'));b.classList.add('a')};b.onmouseenter=on;b.onclick=on});
 // portfolio filter
-$('#flt').onclick=e=>{const c=e.target.dataset.c;if(!c)return;$$('#flt button').forEach(b=>{const on=b===e.target;b.classList.toggle('a',on);b.setAttribute('aria-pressed',on)});$('#pf').classList.toggle('all',c==='all');
+const flt=$('#flt');
+if(flt)flt.onclick=e=>{const c=e.target.dataset.c;if(!c)return;$$('#flt button').forEach(b=>{const on=b===e.target;b.classList.toggle('a',on);b.setAttribute('aria-pressed',on)});$('#pf').classList.toggle('all',c==='all');
  $$('#pf .pi').forEach(p=>{const show=c==='all'||p.dataset.c===c;if(show){p.classList.remove('h');requestAnimationFrame(()=>p.classList.remove('f0'))}else{p.classList.add('f0');setTimeout(()=>p.classList.contains('f0')&&p.classList.add('h'),350)}})};
+// blog filter
+const bflt=$('#bflt');
+if(bflt)bflt.onclick=e=>{const c=e.target.dataset.c;if(!c)return;$$('#bflt button').forEach(b=>{const on=b===e.target;b.classList.toggle('a',on);b.setAttribute('aria-pressed',on)});
+ let n=0;$$('#blg article').forEach(p=>{const show=c==='all'||p.dataset.c===c;p.classList.toggle('h',!show);if(show)n++});const em=$('#empty');if(em)em.hidden=n>0};
 // testimonials
 const R=[['Client Name','Founder, Company A','Placeholder testimonial — replace with a real client quote about results and collaboration.'],['Client Name','Marketing Head, Company B','Placeholder testimonial — replace with a real client quote about results and collaboration.'],['Client Name','CEO, Company C','Placeholder testimonial — replace with a real client quote about results and collaboration.']];
 let ri=0;const sl=$('#sl'),dots=$$('#dots button');
 const show=i=>{ri=i;sl.classList.add('x');setTimeout(()=>{$('#rq').textContent='“'+R[i][2]+'”';$('#rn').textContent=R[i][0];$('#rr').textContent=R[i][1];dots.forEach((d,k)=>d.classList.toggle('a',k===i));sl.classList.remove('x')},300)};
-dots.forEach((d,k)=>d.onclick=()=>{show(k);clearInterval(tm)});show(0);
+let tm=0;
+if(sl){dots.forEach((d,k)=>d.onclick=()=>{show(k);clearInterval(tm)});show(0);
 // pause the auto-rotating testimonial while hovered/focused (WCAG 2.2.2)
 const tsBox=$('#testimonials');let hold=false;
 if(tsBox){['mouseenter','focusin'].forEach(ev=>tsBox.addEventListener(ev,()=>hold=true));['mouseleave','focusout'].forEach(ev=>tsBox.addEventListener(ev,()=>hold=false))}
-let tm=rm?0:setInterval(()=>{if(hold||document.hidden)return;show((ri+1)%3)},6000);
+tm=rm?0:setInterval(()=>{if(hold||document.hidden)return;show((ri+1)%3)},6000)}
 
 // ===== extra animation layer =====
 const pg=document.createElement('div');pg.id='prog';pg.setAttribute('aria-hidden','true');document.body.prepend(pg);
@@ -46,8 +52,8 @@ if(!rm&&matchMedia('(hover:hover)').matches){$$('.card,.panel').forEach(c=>{c.ad
  // hero floating cards follow the mouse (parallax)
  const fcs=$$('.fc');addEventListener('mousemove',e=>{const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;fcs.forEach((f,i)=>f.style.translate=`${x*(i%2?-30:30)}px ${y*(i<2?-24:24)}px`)})}
 // hero particle network
-const cv=document.createElement('canvas');cv.id='cv';cv.setAttribute('aria-hidden','true');$('#home').prepend(cv);
-if(!rm){const x=cv.getContext('2d');let W,H,P=[];const N=innerWidth<700?28:60;
+const home=$('#home'),cv=document.createElement('canvas');cv.id='cv';cv.setAttribute('aria-hidden','true');if(home)home.prepend(cv);
+if(!rm&&home){const x=cv.getContext('2d');let W,H,P=[];const N=innerWidth<700?28:60;
  const rs=()=>{W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight};rs();addEventListener('resize',rs);
  for(let i=0;i<N;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35});
  let vis=true;new IntersectionObserver(e=>vis=e[0].isIntersecting).observe(cv);
@@ -60,7 +66,7 @@ $$('.pi').forEach(p=>io.observe(p));
 const seed=()=>Math.random().toString(36).slice(2,8);
 const photo=(el,w,h)=>{const g=getComputedStyle(el).backgroundImage;el.style.backgroundImage='url(https://picsum.photos/seed/'+seed()+'/'+w+'/'+h+')'+(g==='none'?'':','+g);el.style.backgroundSize='cover';el.style.backgroundPosition='center';el.style.backgroundRepeat='no-repeat'};
 $$('#pf .pi .im').forEach(el=>photo(el,900,500));
-$$('.bl .im i').forEach(el=>photo(el,800,600));
+$$('.bl .im i,.feat .im i').forEach(el=>photo(el,800,600));
 $$('#ig .pi').forEach(el=>photo(el,600,600));
 })();
 (()=>{
@@ -69,13 +75,14 @@ const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,fine=matchMedia('
 const H=document.documentElement,B=document.body,clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 // preloader
 const pre=$('#pre'),pc=$('#pc'),pbar=$('#pbar');
-const done=()=>{if(B.classList.contains('ld'))return;B.classList.add('ld');if(pre){pre.classList.add('out');setTimeout(()=>pre.remove(),1200)}};
+const done=()=>{if(B.classList.contains('ld'))return;B.classList.add('ld');if(pre){pre.classList.add('out');setTimeout(()=>pre.remove(),1200)};
+ if(location.hash){const t=document.getElementById(decodeURIComponent(location.hash.slice(1)));if(t)setTimeout(()=>scrollTo({top:t.getBoundingClientRect().top+scrollY-70,behavior:rm?'auto':'smooth'}),1600)}};
 if(rm||!pre)done();else{let t0;const f=t=>{t0??=t;const p=Math.min(1,(t-t0)/1400);pc.textContent=Math.round(p*100);pbar.style.width=p*100+'%';p<1?requestAnimationFrame(f):setTimeout(done,150)};requestAnimationFrame(f);setTimeout(done,4000)}
 // Lenis smooth scroll (CDN, optional)
 if(window.Lenis&&!rm){const l=new Lenis({lerp:.09});H.classList.add('lenis');const r=t=>{l.raf(t);requestAnimationFrame(r)};requestAnimationFrame(r);
  $$('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const id=a.getAttribute('href');if(id.length<2)return;const t=$(id);if(t){e.preventDefault();l.scrollTo(t,{offset:-70,duration:1.4})}}))}
-// nav scroll-spy
-const links=$$('.links a'),so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}),{rootMargin:'-45% 0px -50% 0px'});
+// nav scroll-spy (only in-page anchors; sections without a nav link keep the last highlight)
+const links=$$('.links a[href^="#"]'),so=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const m=links.find(a=>a.getAttribute('href')==='#'+e.target.id);if(!m)return;links.forEach(a=>a.classList.toggle('on',a===m))}),{rootMargin:'-45% 0px -50% 0px'});
 $$('main section[id]').forEach(s=>so.observe(s));
 // service list stagger index
 $$('.card').forEach(c=>$$('li',c).forEach((l,k)=>l.style.setProperty('--k',k)));
@@ -85,11 +92,12 @@ if(rm)return;
 // shapes, orbit, scroll cue, aurora
 const home=$('#home'),fin=$('.fin'),shapes=[];
 const mk=(host,list)=>list.forEach(([c,s,x,y,p])=>{const e=document.createElement('i');e.className='shp '+c;e.style.cssText=`width:${s}px;height:${s}px;left:${x}%;top:${y}%`;host.append(e);shapes.push([e,host,p])});
-mk(home,[['ring',90,10,68,.12],['sq',46,86,60,-.1],['plus',34,50,14,.2],['ring',44,78,12,.18],['sq',30,6,20,-.15]]);
-mk(fin,[['ring',120,8,20,.1],['sq',60,88,30,-.12],['plus',40,60,70,.15]]);
-const orb=document.createElement('div');orb.className='orb';home.prepend(orb);
-const cue=document.createElement('div');cue.className='cue';home.append(cue);
-[['left:-10%;top:-30%;width:420px;height:420px;background:rgba(47,107,255,.35)'],['right:-8%;bottom:-30%;width:380px;height:380px;background:rgba(139,92,246,.35);animation-delay:-6s']].forEach(([s])=>{const b=document.createElement('div');b.className='blob';b.style.cssText=s;fin.prepend(b)});
+if(home)mk(home,[['ring',90,10,68,.12],['sq',46,86,60,-.1],['plus',34,50,14,.2],['ring',44,78,12,.18],['sq',30,6,20,-.15]]);
+if(fin)mk(fin,[['ring',120,8,20,.1],['sq',60,88,30,-.12],['plus',40,60,70,.15]]);
+let orb=null,cue=null;
+if(home){orb=document.createElement('div');orb.className='orb';home.prepend(orb);
+ cue=document.createElement('div');cue.className='cue';home.append(cue)}
+if(fin)[['left:-10%;top:-30%;width:420px;height:420px;background:rgba(47,107,255,.35)'],['right:-8%;bottom:-30%;width:380px;height:380px;background:rgba(139,92,246,.35);animation-delay:-6s']].forEach(([s])=>{const b=document.createElement('div');b.className='blob';b.style.cssText=s;fin.prepend(b)});
 // custom cursor
 if(fine){H.classList.add('cur');const d=document.createElement('div'),r=document.createElement('div');d.className='cd';r.className='cr';B.append(d,r);let mx=0,my=0,rx=0,ry=0;
  addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;d.classList.add('on');r.classList.add('on');d.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`});
@@ -103,10 +111,10 @@ const wb=$$('#why button'),why=$('#why');let wp=false;if(wb.length){['mouseenter
 const dash=$$('b[data-c]');const pn=dash.length&&dash[0].closest('.panel');if(pn){const sm=$('small',pn);if(sm){const dt=document.createElement('i');dt.className='live';sm.prepend(dt)}
  new IntersectionObserver((e,o)=>{if(!e[0].isIntersecting)return;o.disconnect();setTimeout(()=>setInterval(()=>dash.forEach((el,i)=>{const cur=+el.textContent.replace(/,/g,'');if(!cur)return;el.textContent=(cur+Math.floor(Math.random()*(i?3:14)+1)).toLocaleString();el.classList.add('tk');setTimeout(()=>el.classList.remove('tk'),300)}),2200),2400)},{threshold:.3}).observe(pn)}
 // scroll-linked loop: marquee velocity, big text, steps, hero fade, shape parallax
-const tr=$('.tr'),an=tr&&tr.getAnimations()[0],big=$('#big'),bw=$('.big'),steps=$$('#steps>div'),hw=$('#home .wrap');let last=scrollY,rate=1;
+const tr=$('.tr'),an=tr&&tr.getAnimations()[0],big=$('#big'),bw=big&&big.parentElement,steps=$$('#steps>div'),hw=$('#home .wrap');let last=scrollY,rate=1;
 (function t(){requestAnimationFrame(t);const y=scrollY,v=Math.abs(y-last);last=y;rate+=((1+Math.min(v*.25,8))-rate)*.1;if(an)an.playbackRate=rate;
  if(big){const r=bw.getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0){const p=clamp((innerHeight-r.top)/(innerHeight+r.height),0,1);big.style.transform=`translateX(${-p*Math.max(0,big.scrollWidth-innerWidth)}px)`}}
  steps.forEach(s=>s.classList.toggle('on',s.getBoundingClientRect().top<innerHeight*.78));
- if(y<innerHeight*1.2){hw.style.transform=`translateY(${y*.22}px)`;hw.style.opacity=clamp(1-y/(innerHeight*.75),0,1);cue.style.opacity=clamp(1-y/200,0,1)}
+ if(y<innerHeight*1.2){if(hw){hw.style.transform=`translateY(${y*.22}px)`;hw.style.opacity=clamp(1-y/(innerHeight*.75),0,1)}if(cue)cue.style.opacity=clamp(1-y/200,0,1)}
  shapes.forEach(([e,h,p])=>e.style.translate=`0 ${(y-h.offsetTop)*p}px`)})();
 })();
