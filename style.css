@@ -10,13 +10,29 @@ section{padding:clamp(48px,6vw,84px) 0;position:relative}
 h2{font-size:clamp(2rem,5.5vw,4rem);font-weight:800;text-transform:uppercase;line-height:1.02}
 .g{background:linear-gradient(100deg,#2f6bff,#8b5cf6,#38bdf8,#2f6bff);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:pan 6s linear infinite}
 .lbl{display:flex;align-items:center;gap:12px;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;font-weight:600;color:var(--blue);margin-bottom:20px}
-.lbl:before{content:"";width:40px;height:1px;background:var(--blue)}
+.lbl:before{content:"";display:block;width:36px;height:2px;background:linear-gradient(90deg,var(--blue),var(--violet));border-radius:2px;transform:scaleX(0);transform-origin:left;transition:transform .75s cubic-bezier(.16,1,.3,1)}
+.in .lbl:before,.lbl.in:before{transform:scaleX(1)!important}
 .glass{background:rgba(255,255,255,.04);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
 .gb{position:relative}.gb:before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg,#2f6bff,transparent 40%,#8b5cf6);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.7}
 .btn{display:inline-block;padding:16px 28px;border-radius:99px;font-weight:600;font-size:.9rem;border:0;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .3s,background .3s}
 .pri{background:linear-gradient(90deg,var(--blue),var(--violet));box-shadow:0 0 40px -8px var(--blue)}.pri:hover{box-shadow:0 0 60px -4px var(--violet);transform:translateY(-2px)}
 .sec{background:rgba(255,255,255,.06);border:1px solid var(--line)}.sec:hover{background:rgba(255,255,255,.12)}
-.rv{opacity:0;transform:translateY(32px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}.rv.in{opacity:1;transform:none}
+/* best scrolling animation suite - universal hardware-accelerated base */
+.rv,.card,.svc a,.stats div,.steps>div,.pi,.bl article,.pk>div,.office div,.panel.rv,.rev,form.fm{
+  opacity:0;
+  transform:translate3d(0,28px,0) scale(.98);
+  transition:opacity .75s cubic-bezier(.16,1,.3,1),transform .75s cubic-bezier(.16,1,.3,1),box-shadow .4s ease,border-color .4s ease;
+  will-change:opacity,transform;
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+}
+.rv.in,.card.in,.svc a.in,.stats div.in,.steps>div.in,.pi.in,.bl article.in,.pk>div.in,.office div.in,.panel.in,.rev.in,form.fm.in{
+  opacity:1!important;
+  transform:translate3d(0,0,0) scale(1)!important;
+}
+.card,.svc a,.pi,.bl article,.pk>div,.office div,.steps>div,.stats div{
+  transition-delay:calc((var(--si,0)%3)*.08s);
+}
 @keyframes pan{to{background-position:250% 0}}@keyframes marq{to{transform:translateX(-50%)}}@keyframes fl{50%{transform:translateY(-14px)}}
 /* nav */
 header{position:fixed;inset:0 0 auto;z-index:120;transition:.3s}header.s{background:rgba(5,6,15,.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.05)}
@@ -116,7 +132,7 @@ h1 .l{display:block;overflow:hidden}h1 .l span{display:block;transform:translate
 @keyframes up{to{transform:none}}
 .sub{max-width:660px;margin:32px auto 0;color:var(--mut);font-size:clamp(1rem,1.6vw,1.15rem);position:relative}
 .cta{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:40px;position:relative}
-.fc{position:absolute;padding:16px 22px;border-radius:18px;animation:fl 6s ease-in-out infinite;text-align:left}
+.fc{position:absolute;padding:16px 22px;border-radius:18px;animation:fl 6s ease-in-out infinite;text-align:left;z-index:3}
 .fc small{color:rgba(255,255,255,.5);font-size:.72rem;display:block}.fc b{font:700 1.9rem Outfit}
 /* marquee */
 .mq{border-block:1px solid rgba(255,255,255,.05);padding:36px 0;overflow:hidden}.mq p{text-align:center;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:22px}
@@ -179,7 +195,8 @@ svg path.ln{stroke-dasharray:500;stroke-dashoffset:500;transition:stroke-dashoff
 /* final cta */
 .fin{text-align:center;overflow:hidden;background:linear-gradient(135deg,rgba(47,107,255,.4),rgba(139,92,246,.3) 50%,var(--ink));background-size:200% 200%;animation:pan2 10s ease infinite}
 @keyframes pan2{50%{background-position:100% 100%}}
-.fin p{max-width:560px;margin:24px auto 0;color:rgba(255,255,255,.7);position:relative}.fin .wrap{position:relative}
+.fin p{max-width:560px;margin:24px auto 0;color:rgba(255,255,255,.7);position:relative}
+.fin .wrap{position:relative}
 /* contact */
 .ct{display:grid;grid-template-columns:2fr 3fr;gap:56px}
 .ci li{padding:8px 0;color:rgba(255,255,255,.7)}.map{height:160px;border-radius:16px;margin-top:28px;display:grid;place-items:center;color:rgba(255,255,255,.6);font-size:.85rem}
@@ -223,16 +240,22 @@ footer h4{margin-bottom:10px;font-size:.95rem}footer li,footer p{color:rgba(255,
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
 .gb:before{background:conic-gradient(from var(--a),#2f6bff,transparent 30%,#8b5cf6 55%,transparent 80%,#2f6bff);animation:spin 6s linear infinite}
 @keyframes spin{to{--a:360deg}}
-#prog{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--blue),var(--violet),#38bdf8);z-index:100}
+#prog{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0) translateZ(0);background:linear-gradient(90deg,var(--blue),var(--violet),#38bdf8);box-shadow:0 0 14px rgba(56,189,248,.8),0 0 4px var(--blue);z-index:999;pointer-events:none}
 #cv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .blob{animation:drift 14s ease-in-out infinite alternate}@keyframes drift{to{margin:60px 0 0 80px}}
 .btn{position:relative;overflow:hidden}.btn:after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .7s}.btn:hover:after{left:130%}
 .card,.panel{transform-style:preserve-3d;will-change:transform}
 .card .gl{position:absolute;inset:0;background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.10),transparent 45%);opacity:0;transition:opacity .3s;pointer-events:none;border-radius:inherit}.card:hover .gl{opacity:1}
 .ic{animation:fl 5s ease-in-out infinite}
-.steps .dot{animation:pulse 2.4s ease-out infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(47,107,255,.6)}100%{box-shadow:0 0 0 16px rgba(47,107,255,0)}}
-h2 .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em}h2 .w>span{display:inline-block;transform:translateY(105%) rotate(4deg);transition:transform .9s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i)*.06s)}h2.in .w>span,.in h2 .w>span{transform:none}
-.im{clip-path:inset(0 0 100% 0);transition:clip-path 1s cubic-bezier(.22,1,.36,1),transform .8s}.pi.in .im,.in .im{clip-path:inset(0)}
+.steps .dot{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--violet));display:grid;place-items:center;font-size:.8rem;font-weight:700;position:relative;z-index:1;transition:transform .5s cubic-bezier(.16,1,.3,1),box-shadow .5s ease,border-color .3s}
+.steps>div.on .dot{transform:scale(1.18)!important;box-shadow:0 0 24px rgba(47,107,255,.8),0 0 45px rgba(139,92,246,.45)!important;border-color:#fff}
+h2 .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em}
+h2 .w>span{display:inline-block;transform:translate3d(0,115%,0) rotate(3deg);opacity:0;transition:transform .85s cubic-bezier(.16,1,.3,1),opacity .6s ease;transition-delay:calc(var(--i)*.05s);will-change:transform,opacity}
+h2.in .w>span,.in h2 .w>span{transform:translate3d(0,0,0) rotate(0deg)!important;opacity:1!important}
+.pi{border-radius:18px;overflow:hidden}
+.pi .im{width:100%;aspect-ratio:16/10;transform:scale(1.08);clip-path:inset(3% round 14px);transition:transform .85s cubic-bezier(.16,1,.3,1),clip-path .85s cubic-bezier(.16,1,.3,1)}
+.pi.in .im{transform:scale(1);clip-path:inset(0 round 18px)!important}
+.im{clip-path:none;transition:transform .8s}
 .bl .im{clip-path:none}.bl .im i{clip-path:inset(0 100% 0 0);transition:clip-path 1.1s cubic-bezier(.22,1,.36,1),transform .8s}.bl .in .im i{clip-path:inset(0)}
 .flow span{position:relative}.flow em{animation:nudge 1.6s ease-in-out infinite}@keyframes nudge{50%{transform:translateX(6px)}}
 .serp h4:after{content:"|";animation:blink 1s steps(2) infinite;color:var(--blue)}@keyframes blink{50%{opacity:0}}
@@ -422,73 +445,37 @@ html.nomo #home .shp,html.nomo .fin .shp{opacity:.6}
  .fm input,.fm select,.fm textarea,.nl input{font-size:16px}
  .fm input,.fm select,.fm textarea{font-size:16px}
 }
-/* ===== Mobile scroll animation & lag prevention layer ===== */
+/* ===== Mobile responsive scroll animation & 120Hz layer ===== */
 @media(max-width:768px),(hover:none){
-  /* 1. Prevent iOS GPU memory strain: soften blur radius and avoid 140px Gaussian shader passes */
-  .blob{
-    filter:blur(36px)!important;
-    -webkit-filter:blur(36px)!important;
-    opacity:.6!important;
-    will-change:auto!important;
-    pointer-events:none;
+  /* tuned travel distance for mobile touch screens */
+  .rv,.card,.svc a,.stats div,.steps>div,.pi,.bl article,.pk>div,.office div,.panel.rv,.rev,form.fm{
+    transform:translate3d(0,18px,0) scale(.985);
+    transition:opacity .54s cubic-bezier(.16,1,.3,1),transform .54s cubic-bezier(.16,1,.3,1);
   }
-  .glow{
-    display:none!important;
+  .card,.svc a,.pi,.bl article,.pk>div,.office div,.steps>div,.stats div{
+    transition-delay:calc((var(--si,0)%2)*.07s)!important;
   }
 
-  /* 2. Release 3D layers that cause texture-memory stalls in WebKit */
-  .card,.panel{
-    transform-style:flat!important;
-    will-change:auto!important;
-  }
+  /* GPU performance on mobile */
+  .blob{filter:blur(34px)!important;-webkit-filter:blur(34px)!important;opacity:.6!important;will-change:auto!important;pointer-events:none}
+  .glow{display:none!important}
+  .card,.panel{transform-style:flat!important;will-change:auto!important}
+  .gla{backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important}
+  html,body{-webkit-overflow-scrolling:touch}
 
-  /* 3. Lighter glass reflection on mobile */
-  .gla{
-    backdrop-filter:blur(8px)!important;
-    -webkit-backdrop-filter:blur(8px)!important;
-  }
+  /* Dynamic header compression on mobile scroll */
+  header nav{height:66px;transition:height .3s cubic-bezier(.16,1,.3,1)}
+  header.s nav{height:58px}
 
-  /* 4. Smooth touch momentum scrolling on iOS */
-  html,body{
-    -webkit-overflow-scrolling:touch;
-  }
+  /* Headline word motion on mobile */
+  h2 .w>span{transform:translate3d(0,105%,0);transition:transform .7s cubic-bezier(.16,1,.3,1),opacity .5s ease}
 
-  /* 5. Mobile scroll-reveal animation */
-  .rv,.card,.svc a,.stats div,.steps>div,.pi,.bl article,.pk>div,.office div{
-    opacity:0;
-    transform:translate3d(0,22px,0);
-    transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);
-    -webkit-backface-visibility:hidden;
-    backface-visibility:hidden;
-  }
-
-  .rv.in,.card.in,.svc a.in,.stats div.in,.steps>div.in,.pi.in,.bl article.in,.pk>div.in,.office div.in{
-    opacity:1;
-    transform:translate3d(0,0,0)!important;
-  }
-
-  /* 6. Mobile stagger cascade delays */
-  .svc a:nth-child(even),.stats div:nth-child(even),.steps>div:nth-child(even),.bl article:nth-child(even),.pk>div:nth-child(even){
-    transition-delay:.08s;
-  }
-
-  /* 7. Image reveal smooth easing on mobile */
-  .pi .im{
-    transition:transform .6s ease;
-  }
-  .pi.in .im{
-    clip-path:inset(0);
-  }
-
-  /* 8. Steps dot pulse smoothly on reveal */
-  .steps>div.on .dot{
-    transform:scale(1.12);
-    box-shadow:0 0 16px rgba(47,107,255,.6);
-  }
+  /* Steps dot pulse on mobile */
+  .steps>div.on .dot{transform:scale(1.14)!important;box-shadow:0 0 18px rgba(47,107,255,.7)!important}
 }
 
 /* Fallback: if animation fails or JS disabled, ensure everything is fully visible */
-html.nomo .card,html.nomo .svc a,html.nomo .stats div,html.nomo .steps>div,html.nomo .pi,html.nomo .bl article,html.nomo .pk>div,html.nomo .office div{
+html.nomo .rv,html.nomo .card,html.nomo .svc a,html.nomo .stats div,html.nomo .steps>div,html.nomo .pi,html.nomo .bl article,html.nomo .pk>div,html.nomo .office div,html.nomo .panel,html.nomo .rev,html.nomo form.fm{
   opacity:1!important;
   transform:none!important;
 }

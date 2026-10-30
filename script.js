@@ -48,21 +48,18 @@ const gl=$('#glow');if(matchMedia('(hover:hover)').matches&&!rm)addEventListener
 if(!rm)$$('.mag').forEach(b=>{b.onmousemove=e=>{const r=b.getBoundingClientRect();b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.2}px,${(e.clientY-r.top-r.height/2)*.3}px)`};b.onmouseleave=()=>b.style.transform=''});
 // counters
 const count=el=>{const n=+el.dataset.n,d=+(el.dataset.d||0),s=el.dataset.s||'',c=el.dataset.c;let t0;const f=t=>{t0===undefined&&(t0=t);const p=Math.min(1,(t-t0)/1800),v=n*(1-Math.pow(1-p,3));el.textContent=(c?Math.round(v).toLocaleString():v.toFixed(d))+s;p<1&&requestAnimationFrame(f)};rm?el.textContent=(c?n.toLocaleString():n.toFixed(d))+s:requestAnimationFrame(f)};
-// reveal on scroll (with mobile-friendly fluid threshold & stagger)
+// reveal on scroll (best-in-class multi-element observer)
 const io=new IntersectionObserver(es=>es.forEach(e=>{
   if(!e.isIntersecting)return;
   const t=e.target;
   t.classList.add('in');
   $$('[data-n]',t).forEach(count);
   if(t.matches('[data-n]'))count(t);
-  if(t.id==='bars')$$('i',t).forEach((i,k)=>setTimeout(()=>i.style.height=i.dataset.h+'%',k*80));
+  if(t.id==='bars')$$('i',t).forEach((i,k)=>setTimeout(()=>i.style.height=i.dataset.h+'%',k*70));
   io.unobserve(t);
-}),{threshold:0.06,rootMargin:'0px 0px -30px 0px'});
+}),{threshold:0.05,rootMargin:'0px 0px -25px 0px'});
 
-$$('.rv,.card,.svc a,.stats div,.steps>div,.pi,.bl article,.pk>div,.office div,#bars').forEach((el,i)=>{
-  if(el.matches('.card,.pk>div,.bl>article,.svc a,.stats div,.steps>div,.office div'))el.style.transitionDelay=((i%2)*.08)+'s';
-  io.observe(el);
-});
+$$('.rv,.card,.svc a,.stats div,.steps>div,.pi,.bl article,.pk>div,.office div,.panel.rv,.rev,form.fm,h2,.lbl,#bars').forEach(el=>io.observe(el));
 // why accordion
 const wb=$$('#why button');wb.forEach(b=>{const on=()=>{wb.forEach(x=>x.classList.remove('a'));b.classList.add('a')};b.onmouseenter=on;b.onclick=on});
 // portfolio filter
@@ -75,9 +72,9 @@ if(bflt)bflt.onclick=e=>{const c=e.target.dataset.c;if(!c)return;$$('#bflt butto
  let n=0;$$('#blg article').forEach(p=>{const show=c==='all'||p.dataset.c===c;p.classList.toggle('h',!show);if(show)n++});const em=$('#empty');if(em)em.hidden=n>0};
 // testimonials
 const R=[
-  ['Elena Rostova','Founder, Lumina Living','Smartamigos scaled our organic traffic by 180% within 6 months. Their SEO and web redesign transformed our online pipeline completely.','https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=160&h=160&q=80'],
-  ['Marcus Vance','CMO, Orbital Tech','Their Google Ads campaigns reduced our customer acquisition cost by 42% while tripling qualified lead volume. Truly exceptional performance.','https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&h=160&q=80'],
-  ['Sarah Jenkins','CEO, Northwind Retail','From initial strategy to launch, the team was razor sharp. Our new e-commerce platform converts at 7.4%, far exceeding our original forecast.','https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=160&h=160&q=80']
+  ['Elena Rostova','Founder, Lumina Living','Smartamigos scaled our organic traffic by 180% within 6 months. Their SEO and web redesign transformed our online pipeline completely.','images/testimonials/elena-rostova.jpg'],
+  ['Marcus Vance','CMO, Orbital Tech','Their Google Ads campaigns reduced our customer acquisition cost by 42% while tripling qualified lead volume. Truly exceptional performance.','images/testimonials/marcus-vance.jpg'],
+  ['Sarah Jenkins','CEO, Northwind Retail','From initial strategy to launch, the team was razor sharp. Our new e-commerce platform converts at 7.4%, far exceeding our original forecast.','images/testimonials/sarah-jenkins.jpg']
 ];
 let ri=0;const sl=$('#sl'),dots=$$('#dots button');
 const show=i=>{ri=i;sl.classList.add('x');setTimeout(()=>{$('#rq').textContent='“'+R[i][2]+'”';$('#rn').textContent=R[i][0];$('#rr').textContent=R[i][1];const av=$('.av');if(av&&R[i][3])av.style.backgroundImage='url('+R[i][3]+')';dots.forEach((d,k)=>d.classList.toggle('a',k===i));sl.classList.remove('x')},300)};
@@ -90,7 +87,7 @@ tm=rm?0:setInterval(()=>{if(hold||document.hidden)return;show((ri+1)%3)},6000)}
 
 // ===== extra animation layer ===== (progress bar handled in unified scroll engine)
 // split h2 into masked words
-$$('h2').forEach(h=>{let i=0;const wrap=n=>{[...n.childNodes].forEach(c=>{if(c.nodeType===3){const f=document.createDocumentFragment();c.textContent.split(/(\s+)/).forEach(t=>{if(!t.trim()){f.append(t);return}const w=document.createElement('span');w.className='w';w.innerHTML='<span style="--i:'+(i++)+'">'+t+'</span>';f.append(w)});c.replaceWith(f)}else if(c.nodeName==='BR'){}else if(c.classList&&c.classList.contains('g')){const inner=c.textContent.split(/(\s+)/);c.textContent='';inner.forEach(t=>{if(!t.trim()){c.append(t);return}const w=document.createElement('span');w.className='w';w.innerHTML='<span style="--i:'+(i++)+'">'+t+'</span>';c.append(w)})}})};wrap(h);const p=h.closest('.rv');if(!p)io.observe(h)});
+$$('h2').forEach(h=>{let i=0;const wrap=n=>{[...n.childNodes].forEach(c=>{if(c.nodeType===3){const f=document.createDocumentFragment();c.textContent.split(/(\s+)/).forEach(t=>{if(!t.trim()){f.append(t);return}const w=document.createElement('span');w.className='w';w.innerHTML='<span style="--i:'+(i++)+'">'+t+'</span>';f.append(w)});c.replaceWith(f)}else if(c.nodeName==='BR'){}else if(c.classList&&c.classList.contains('g')){const inner=c.textContent.split(/(\s+)/);c.textContent='';inner.forEach(t=>{if(!t.trim()){c.append(t);return}const w=document.createElement('span');w.className='w';w.innerHTML='<span style="--i:'+(i++)+'">'+t+'</span>';c.append(w)})}})};wrap(h);io.observe(h)});
 // spotlight + 3D tilt on cards
 $$('.card').forEach(c=>{const g=document.createElement('i');g.className='gl';c.append(g)});
 if(!rm&&matchMedia('(hover:hover)').matches){$$('.card,.panel').forEach(c=>{c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;c.style.setProperty('--mx',x+'px');c.style.setProperty('--my',y+'px');c.style.transform=`perspective(900px) rotateX(${(.5-y/r.height)*8}deg) rotateY(${(x/r.width-.5)*8}deg) translateY(-8px)`});c.addEventListener('mouseleave',()=>c.style.transform='')});
@@ -104,37 +101,42 @@ if(!rm&&home){const x=cv.getContext('2d');let W,H,P=[];const N=innerWidth<700?(i
  let vis=true;new IntersectionObserver(e=>vis=e[0].isIntersecting).observe(cv);
  const maxDist=innerWidth<700?6400:12000;
  (function d(){requestAnimationFrame(d);if(!vis)return;x.clearRect(0,0,W,H);P.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;x.fillStyle='rgba(120,150,255,.7)';x.beginPath();x.arc(p.x,p.y,1.5,0,7);x.fill();for(let j=i+1;j<N;j++){const q=P[j],dx=p.x-q.x,dy=p.y-q.y,dd=dx*dx+dy*dy;if(dd<maxDist){x.strokeStyle=`rgba(110,130,255,${.16*(1-dd/maxDist)})`;x.beginPath();x.moveTo(p.x,p.y);x.lineTo(q.x,q.y);x.stroke()}}})})()}
-// stagger grid children
-$$('.cards,.pf,.bl,.pk,.stats').forEach(g=>[...g.children].forEach((c,i)=>c.style.transitionDelay=(i%3)*.1+'s'));
-// image reveal for portfolio/social tiles
-$$('.pi').forEach(p=>io.observe(p));
+// stagger grid children with adaptive relative indices
+$$('.cards,.pf,.bl,.pk,.stats,.office,.svc,.steps').forEach(g=>[...g.children].forEach((c,i)=>{
+  c.style.setProperty('--si',i);
+  if(window.innerWidth<=768||matchMedia('(hover:none)').matches){
+    c.style.transitionDelay=((i%2)*.07)+'s';
+  }else{
+    c.style.transitionDelay=((i%3)*.08)+'s';
+  }
+}));
 // related high-resolution photos matched to each topic
 const pfImgs=[
-  'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1533750516457-a7f992034fec?auto=format&fit=crop&w=900&q=80',
-  'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=900&q=80'
+  'images/portfolio/ecommerce-website.jpg',
+  'images/portfolio/corporate-website.jpg',
+  'images/portfolio/restaurant-website.jpg',
+  'images/portfolio/real-estate-website.jpg',
+  'images/portfolio/fashion-brand.jpg',
+  'images/portfolio/seo-growth.jpg',
+  'images/portfolio/social-media.jpg',
+  'images/portfolio/google-ads.jpg',
+  'images/portfolio/creative-design.jpg'
 ];
 const blImgs=[
-  'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1516251193007-45ef944ab0c6?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80'
+  'images/blog/local-seo.jpg',
+  'images/blog/ad-spend.jpg',
+  'images/blog/page-speed.jpg',
+  'images/blog/reels-system.jpg',
+  'images/blog/email-sequences.jpg',
+  'images/blog/google-maps.jpg',
+  'images/blog/headless-wordpress.jpg',
+  'images/blog/pmax-budget.jpg',
+  'images/blog/visual-rules.jpg'
 ];
 const setBg=(el,url)=>{if(!el)return;el.style.backgroundImage='url('+url+')';el.style.backgroundSize='cover';el.style.backgroundPosition='center';el.style.backgroundRepeat='no-repeat'};
 $$('#pf .pi .im').forEach((el,i)=>setBg(el,pfImgs[i%pfImgs.length]));
 $$('.bl .im i').forEach((el,i)=>setBg(el,blImgs[i%blImgs.length]));
-const feat=$('.feat .im i');if(feat)setBg(feat,'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80');
+const feat=$('.feat .im i');if(feat)setBg(feat,'images/blog/blueprint-2026.jpg');
 }catch(e){document.documentElement.classList.add('nomo');console.error('init failed',e)}
 })();
 (()=>{try{
