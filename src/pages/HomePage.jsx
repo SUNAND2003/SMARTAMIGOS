@@ -426,9 +426,6 @@ export default function HomePage() {
                         <Link to="/article" style={{ color: 'var(--blue)', fontWeight: 600, fontSize: '0.9rem' }}>
                           Read Article &rarr;
                         </Link>
-                        <span style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.45)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          📂 Click folder to open
-                        </span>
                       </div>
                     </div>
                   </article>
