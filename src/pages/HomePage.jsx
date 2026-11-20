@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ParticleCanvas from '../components/ParticleCanvas';
 import Marquee from '../components/Marquee';
 import StatsCounter from '../components/StatsCounter';
+import SplitText from '../components/SplitText';
+import Folder from '../components/Folder';
 import { ScrollReveal, StaggerContainer, StaggerItem, TiltCard } from '../components/ScrollReveal';
 import { servicesData } from '../data/servicesData';
 import { portfolioData, portfolioCategories } from '../data/portfolioData';
 import { blogData } from '../data/blogData';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const filteredPortfolio = selectedCategory === 'all'
@@ -65,17 +68,61 @@ export default function HomePage() {
 
         <div className="wrap" style={{ position: 'relative', zIndex: 2 }}>
           <h1>
-            <span className="l">
-              <span style={{ animationDelay: '0.1s' }}>We build</span>
+            <span className="hero-line">
+              <SplitText
+                tag="span"
+                text="We build"
+                className="hero-split-text"
+                effect="rise"
+                splitType="chars"
+                delay={32}
+                startDelay={60}
+                duration={1.15}
+                trigger="load"
+                hoverEffect="lift"
+              />
             </span>
-            <span className="l">
-              <span className="g" style={{ animationDelay: '0.22s, 0s' }}>Digital</span>
+            <span className="hero-line">
+              <SplitText
+                tag="span"
+                text="Digital"
+                className="hero-split-text g"
+                effect="rise"
+                splitType="chars"
+                delay={32}
+                startDelay={260}
+                duration={1.15}
+                trigger="load"
+                hoverEffect="lift"
+              />
             </span>
-            <span className="l">
-              <span style={{ animationDelay: '0.34s' }}>experiences that</span>
+            <span className="hero-line">
+              <SplitText
+                tag="span"
+                text="experiences that"
+                className="hero-split-text"
+                effect="rise"
+                splitType="chars"
+                delay={28}
+                startDelay={450}
+                duration={1.15}
+                trigger="load"
+                hoverEffect="lift"
+              />
             </span>
-            <span className="l">
-              <span className="g" style={{ animationDelay: '0.46s, 0s' }}>Grow businesses.</span>
+            <span className="hero-line">
+              <SplitText
+                tag="span"
+                text="Grow businesses."
+                className="hero-split-text g"
+                effect="rise"
+                splitType="chars"
+                delay={28}
+                startDelay={700}
+                duration={1.15}
+                trigger="load"
+                hoverEffect="lift"
+              />
             </span>
           </h1>
 
@@ -313,35 +360,82 @@ export default function HomePage() {
       <section id="blog" className="alt">
         <div className="wrap">
           <ScrollReveal>
-            <div className="lbl">Insights</div>
+            <div className="lbl">Insights &amp; Playbooks</div>
             <h2>Latest <span className="g">articles.</span></h2>
+            <p style={{ color: 'var(--mut)', marginTop: '8px', fontSize: '0.95rem' }}>
+              Interactive strategy dossiers &mdash; click or hover any folder to explore documents, case studies, and execution blueprints.
+            </p>
           </ScrollReveal>
 
           <StaggerContainer className="bl" staggerDelay={0.1}>
-            {blogData.slice(0, 3).map((article) => (
-              <StaggerItem key={article.id}>
-                <article>
-                  <div className="im">
-                    <i
-                      className={article.classIdx}
-                      style={{
-                        backgroundImage: `url('${article.image}')`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                      }}
-                    />
-                  </div>
-                  <small>
-                    <b>{article.category}</b> &middot; {article.date}
-                  </small>
-                  <h3>{article.title}</h3>
-                  <Link to="/article">Read Article &rarr;</Link>
-                </article>
-              </StaggerItem>
-            ))}
+            {blogData.slice(0, 3).map((article, idx) => {
+              const folderColors = ['#2f6bff', '#8b5cf6', '#38bdf8'];
+              const extraImages = [
+                [
+                  { image: '/images/blog/google-maps.jpg', title: 'Topic Cluster Blueprint', alt: 'Google Maps SEO' },
+                  { image: '/images/portfolio/seo-growth.jpg', title: '+142% Traffic Growth', alt: 'SEO Performance' }
+                ],
+                [
+                  { image: '/images/blog/pmax-budget.jpg', title: 'Smart Bidding Strategy', alt: 'PMax Strategy' },
+                  { image: '/images/portfolio/google-ads.jpg', title: '4.8x ROAS Dashboard', alt: 'Google Ads Audit' }
+                ],
+                [
+                  { image: '/images/blog/headless-wordpress.jpg', title: 'Modern React Architecture', alt: 'Modern Web Stack' },
+                  { image: '/images/portfolio/ecommerce-website.jpg', title: 'High-Conversion UI', alt: 'E-commerce Engine' }
+                ]
+              ];
+              const extras = extraImages[idx % extraImages.length];
+
+              const folderItems = [
+                {
+                  image: article.image,
+                  title: article.title,
+                  alt: article.title
+                },
+                extras[0],
+                extras[1]
+              ];
+
+              return (
+                <StaggerItem key={article.id}>
+                  <article className="folder-article-card glass gb">
+                    <div className="folder-stage-container">
+                      <Folder
+                        label={article.category}
+                        mode="flap"
+                        variant="glass"
+                        color={folderColors[idx % folderColors.length]}
+                        size={1.05}
+                        items={folderItems}
+                        onItemClick={() => navigate('/article')}
+                      />
+                    </div>
+                    <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      <small>
+                        <b>{article.category}</b> &middot; {article.date} &middot; {article.readTime}
+                      </small>
+                      <h3 style={{ margin: '8px 0 10px', fontSize: '1.25rem', lineHeight: 1.3 }}>
+                        {article.title}
+                      </h3>
+                      <p style={{ color: 'var(--mut)', fontSize: '0.88rem', lineHeight: 1.5, marginBottom: '18px', flex: 1 }}>
+                        {article.excerpt}
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginTop: 'auto' }}>
+                        <Link to="/article" style={{ color: 'var(--blue)', fontWeight: 600, fontSize: '0.9rem' }}>
+                          Read Article &rarr;
+                        </Link>
+                        <span style={{ fontSize: '0.74rem', color: 'rgba(255,255,255,0.45)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          📂 Click folder to open
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                </StaggerItem>
+              );
+            })}
           </StaggerContainer>
 
-          <p className="note" style={{ marginTop: '24px' }}>
+          <p className="note" style={{ marginTop: '32px' }}>
             <Link to="/blog" style={{ color: 'var(--blue)', fontWeight: 600 }}>
               View all articles &rarr;
             </Link>

@@ -228,7 +228,7 @@ export default function AboutPage() {
                 >
                   <p
                     style={{
-                      font: 'italic 500 clamp(1.1rem, 2vw, 1.4rem)/1.6 Outfit',
+                      font: 'italic 500 clamp(1.1rem, 2vw, 1.4rem)/1.6 var(--font-heading)',
                       color: 'rgba(255,255,255,0.95)',
                       marginBottom: '28px'
                     }}

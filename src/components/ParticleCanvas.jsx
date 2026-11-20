@@ -32,7 +32,9 @@ export default function ParticleCanvas() {
       });
     }
 
+    let isVisible = true;
     const render = () => {
+      if (!isVisible) return;
       ctx.clearRect(0, 0, width, height);
 
       // Draw and update particles
@@ -71,10 +73,26 @@ export default function ParticleCanvas() {
       animationFrameId = requestAnimationFrame(render);
     };
 
+    // Pause rendering when hero is off-screen to save 60-120fps CPU/GPU compute
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        if (!isVisible) {
+          isVisible = true;
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = requestAnimationFrame(render);
+        }
+      } else {
+        isVisible = false;
+        cancelAnimationFrame(animationFrameId);
+      }
+    }, { threshold: 0.05 });
+
+    observer.observe(canvas);
     render();
 
     return () => {
       window.removeEventListener('resize', resize);
+      observer.disconnect();
       cancelAnimationFrame(animationFrameId);
     };
   }, []);

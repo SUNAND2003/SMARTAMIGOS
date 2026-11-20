@@ -148,12 +148,12 @@ export default function BlogPage() {
                   transition={{ duration: 0.4 }}
                 >
                   <div className="im">
-                    <i
-                      className={post.classIdx}
-                      style={{
-                        backgroundImage: `url('${post.image}')`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
                       }}
                     />
                   </div>
