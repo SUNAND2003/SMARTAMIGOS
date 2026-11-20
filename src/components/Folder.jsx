@@ -527,18 +527,33 @@ const createGlass = canvas => {
   };
 };
 
-const roundedRect = (ctx, x, y, width, height, radius) => {
-  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+const roundedRect = (ctx, x, y, width, height, radius = 0) => {
+  const safeRadius = Number.isFinite(radius) ? Math.max(0, radius) : 0;
+  const w = Number.isFinite(width) ? Math.max(0, width) : 0;
+  const h = Number.isFinite(height) ? Math.max(0, height) : 0;
+  const r = Math.min(safeRadius, w / 2, h / 2);
   ctx.beginPath();
+  if (r <= 0.001) {
+    ctx.rect(x, y, w, h);
+    return;
+  }
   if (typeof ctx.roundRect === 'function') {
-    ctx.roundRect(x, y, width, height, r);
-  } else {
+    try {
+      ctx.roundRect(x, y, w, h, r);
+      return;
+    } catch {
+      // fallback to arcTo or rect
+    }
+  }
+  try {
     ctx.moveTo(x + r, y);
-    ctx.arcTo(x + width, y, x + width, y + height, r);
-    ctx.arcTo(x + width, y + height, x, y + height, r);
-    ctx.arcTo(x, y + height, x, y, r);
-    ctx.arcTo(x, y, x + width, y, r);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
     ctx.closePath();
+  } catch {
+    ctx.rect(x, y, w, h);
   }
 };
 
@@ -607,43 +622,47 @@ const rasterize = (node, dpr, skipImages) => {
   if (!ctx) return { canvas, pending };
   ctx.scale(dpr, dpr);
   const paint = (element, x, y) => {
-    const style = getComputedStyle(element);
-    if (style.display === 'none' || style.visibility === 'hidden') return;
-    const w = element.offsetWidth;
-    const h = element.offsetHeight;
-    const radius = parseFloat(style.borderTopLeftRadius) || 0;
-    const opacity = element !== node && Number.isFinite(parseFloat(style.opacity)) ? parseFloat(style.opacity) : 1;
-    ctx.save();
-    ctx.globalAlpha *= opacity;
-    if (!isClear(style.backgroundColor)) {
-      ctx.fillStyle = style.backgroundColor;
-      roundedRect(ctx, x, y, w, h, radius);
-      ctx.fill();
-    }
-    if (style.overflow !== 'visible') {
-      roundedRect(ctx, x, y, w, h, radius);
-      ctx.clip();
-    }
-    if (element instanceof HTMLImageElement) {
-      if (!element.complete || !element.naturalWidth) pending.push(element);
-      else if (!skipImages) {
-        try {
-          const ratio = Math.max(w / element.naturalWidth, h / element.naturalHeight);
-          const sw = w / ratio;
-          const sh = h / ratio;
-          ctx.drawImage(element, (element.naturalWidth - sw) / 2, (element.naturalHeight - sh) / 2, sw, sh, x, y, w, h);
-        } catch {
-          // Ignore cross-origin image or canvas tainting
-        }
+    try {
+      const style = getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden') return;
+      const w = element.offsetWidth || 0;
+      const h = element.offsetHeight || 0;
+      const radius = parseFloat(style.borderTopLeftRadius) || 0;
+      const opacity = element !== node && Number.isFinite(parseFloat(style.opacity)) ? parseFloat(style.opacity) : 1;
+      ctx.save();
+      ctx.globalAlpha *= opacity;
+      if (!isClear(style.backgroundColor)) {
+        ctx.fillStyle = style.backgroundColor;
+        roundedRect(ctx, x, y, w, h, radius);
+        ctx.fill();
       }
-    } else {
-      drawText(ctx, element, x, y, w, style);
-      Array.from(element.children).forEach(child => {
-        const at = offsetWithin(child, node);
-        if (at) paint(child, at[0], at[1]);
-      });
+      if (style.overflow !== 'visible') {
+        roundedRect(ctx, x, y, w, h, radius);
+        ctx.clip();
+      }
+      if (element instanceof HTMLImageElement) {
+        if (!element.complete || !element.naturalWidth) pending.push(element);
+        else if (!skipImages) {
+          try {
+            const ratio = Math.max(w / (element.naturalWidth || 1), h / (element.naturalHeight || 1));
+            const sw = w / ratio;
+            const sh = h / ratio;
+            ctx.drawImage(element, (element.naturalWidth - sw) / 2, (element.naturalHeight - sh) / 2, sw, sh, x, y, w, h);
+          } catch {
+            // Ignore cross-origin image or canvas tainting
+          }
+        }
+      } else {
+        drawText(ctx, element, x, y, w, style);
+        Array.from(element.children).forEach(child => {
+          const at = offsetWithin(child, node);
+          if (at) paint(child, at[0], at[1]);
+        });
+      }
+      ctx.restore();
+    } catch {
+      // Safe fallback for canvas rendering
     }
-    ctx.restore();
   };
   paint(node, 0, 0);
   return { canvas, pending };
@@ -1506,7 +1525,9 @@ const Folder = ({
       });
     };
 
+    let inView = true;
     const wake = () => {
+      if (!inView) return;
       if (!state.raf) state.raf = requestAnimationFrame(frame);
     };
 
@@ -1725,6 +1746,24 @@ const Folder = ({
       }
     }
 
+    let viewObserver = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      viewObserver = new IntersectionObserver(
+        entries => {
+          const visible = entries.some(entry => entry.isIntersecting);
+          inView = visible;
+          if (visible) {
+            wake();
+          } else if (state.raf) {
+            cancelAnimationFrame(state.raf);
+            state.raf = 0;
+          }
+        },
+        { threshold: 0.05 }
+      );
+      viewObserver.observe(root);
+    }
+
     engineRef.current = {
       wake,
       invalidate,
@@ -1759,6 +1798,7 @@ const Folder = ({
       document.removeEventListener('pointerdown', onDocumentDown);
       document.removeEventListener('keydown', onKey);
       observer?.disconnect();
+      viewObserver?.disconnect();
       engineRef.current = null;
     };
   }, []);

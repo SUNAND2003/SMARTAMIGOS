@@ -122,24 +122,30 @@ export function AnimatedWords({ text, className = '', gradient = false }) {
 
 export function TiltCard({ children, className = '', style = {} }) {
   const cardRef = useRef(null);
+  const rafId = useRef(null);
 
   const handleMouseMove = (e) => {
     const card = cardRef.current;
     if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
 
-    const rotX = (0.5 - y / rect.height) * 10;
-    const rotY = (x / rect.width - 0.5) * 10;
+    if (rafId.current) cancelAnimationFrame(rafId.current);
+    rafId.current = requestAnimationFrame(() => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-    card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-8px)`;
+      const rotX = ((rect.height / 2 - y) / (rect.height / 2)) * 6;
+      const rotY = ((x - rect.width / 2) / (rect.width / 2)) * 6;
+
+      card.style.transform = `perspective(800px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateY(-6px)`;
+    });
   };
 
   const handleMouseLeave = () => {
     const card = cardRef.current;
     if (!card) return;
-    card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+    if (rafId.current) cancelAnimationFrame(rafId.current);
+    card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0px)';
   };
 
   return (
@@ -149,7 +155,9 @@ export function TiltCard({ children, className = '', style = {} }) {
       onMouseLeave={handleMouseLeave}
       className={className}
       style={{
-        transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease',
+        willChange: 'transform',
+        transformStyle: 'preserve-3d',
+        transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease',
         ...style
       }}
     >

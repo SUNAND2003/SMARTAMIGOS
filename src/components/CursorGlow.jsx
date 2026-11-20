@@ -1,51 +1,76 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function CursorGlow() {
-  const [pos, setPos] = useState({ x: -100, y: -100 });
-  const [visible, setVisible] = useState(false);
+  const glowRef = useRef(null);
 
   useEffect(() => {
-    // Only enable cursor glow for non-touch devices
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    // Only enable cursor glow for mouse pointers (not touch)
+    const isTouch = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
     if (isTouch) return;
 
+    const glow = glowRef.current;
+    if (!glow) return;
+
+    let rafId = null;
+    let targetX = -300;
+    let targetY = -300;
+    let currentX = -300;
+    let currentY = -300;
+    let isVisible = false;
+
+    // 120Hz smooth exponential damping loop (zero React state updates)
+    const render = () => {
+      currentX += (targetX - currentX) * 0.16;
+      currentY += (targetY - currentY) * 0.16;
+      glow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
+      rafId = requestAnimationFrame(render);
+    };
+    rafId = requestAnimationFrame(render);
+
     const handleMouseMove = (e) => {
-      setPos({ x: e.clientX, y: e.clientY });
-      if (!visible) setVisible(true);
+      targetX = e.clientX;
+      targetY = e.clientY;
+      if (!isVisible) {
+        isVisible = true;
+        glow.style.opacity = '1';
+      }
     };
 
     const handleMouseLeave = () => {
-      setVisible(false);
+      isVisible = false;
+      glow.style.opacity = '0';
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
+      cancelAnimationFrame(rafId);
       window.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [visible]);
-
-  if (!visible) return null;
+  }, []);
 
   return (
     <div
+      ref={glowRef}
       style={{
         position: 'fixed',
-        left: `${pos.x}px`,
-        top: `${pos.y}px`,
+        left: 0,
+        top: 0,
         width: '380px',
         height: '380px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(47, 107, 255, 0.15) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(47, 107, 255, 0.14) 0%, rgba(139, 92, 246, 0.07) 40%, transparent 70%)',
         filter: 'blur(30px)',
         pointerEvents: 'none',
-        transform: 'translate(-50%, -50%)',
         zIndex: 1,
-        transition: 'transform 0.08s ease-out, opacity 0.3s ease',
-        willChange: 'transform, left, top'
+        opacity: 0,
+        transition: 'opacity 0.3s ease',
+        willChange: 'transform',
+        transform: 'translate3d(-300px, -300px, 0) translate(-50%, -50%)'
       }}
+      aria-hidden="true"
     />
   );
 }

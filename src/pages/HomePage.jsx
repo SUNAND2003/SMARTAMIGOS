@@ -11,6 +11,36 @@ import { servicesData } from '../data/servicesData';
 import { portfolioData, portfolioCategories } from '../data/portfolioData';
 import { blogData } from '../data/blogData';
 
+const FOLDER_COLORS = ['#2f6bff', '#8b5cf6', '#38bdf8'];
+const EXTRA_DOSSIER_IMAGES = [
+  [
+    { image: '/images/blog/google-maps.jpg', title: 'Topic Cluster Blueprint', alt: 'Google Maps SEO' },
+    { image: '/images/portfolio/seo-growth.jpg', title: '+142% Traffic Growth', alt: 'SEO Performance' }
+  ],
+  [
+    { image: '/images/blog/pmax-budget.jpg', title: 'Smart Bidding Strategy', alt: 'PMax Strategy' },
+    { image: '/images/portfolio/google-ads.jpg', title: '4.8x ROAS Dashboard', alt: 'Google Ads Audit' }
+  ],
+  [
+    { image: '/images/blog/headless-wordpress.jpg', title: 'Modern React Architecture', alt: 'Modern Web Stack' },
+    { image: '/images/portfolio/ecommerce-website.jpg', title: 'High-Conversion UI', alt: 'E-commerce Engine' }
+  ]
+];
+
+// Memoized static array references to eliminate repeated WebGL texture uploads
+const PREPARED_FOLDER_ITEMS = blogData.slice(0, 3).map((article, idx) => {
+  const extras = EXTRA_DOSSIER_IMAGES[idx % EXTRA_DOSSIER_IMAGES.length];
+  return [
+    {
+      image: article.image,
+      title: article.title,
+      alt: article.title
+    },
+    extras[0],
+    extras[1]
+  ];
+});
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -368,48 +398,20 @@ export default function HomePage() {
           </ScrollReveal>
 
           <StaggerContainer className="bl" staggerDelay={0.1}>
-            {blogData.slice(0, 3).map((article, idx) => {
-              const folderColors = ['#2f6bff', '#8b5cf6', '#38bdf8'];
-              const extraImages = [
-                [
-                  { image: '/images/blog/google-maps.jpg', title: 'Topic Cluster Blueprint', alt: 'Google Maps SEO' },
-                  { image: '/images/portfolio/seo-growth.jpg', title: '+142% Traffic Growth', alt: 'SEO Performance' }
-                ],
-                [
-                  { image: '/images/blog/pmax-budget.jpg', title: 'Smart Bidding Strategy', alt: 'PMax Strategy' },
-                  { image: '/images/portfolio/google-ads.jpg', title: '4.8x ROAS Dashboard', alt: 'Google Ads Audit' }
-                ],
-                [
-                  { image: '/images/blog/headless-wordpress.jpg', title: 'Modern React Architecture', alt: 'Modern Web Stack' },
-                  { image: '/images/portfolio/ecommerce-website.jpg', title: 'High-Conversion UI', alt: 'E-commerce Engine' }
-                ]
-              ];
-              const extras = extraImages[idx % extraImages.length];
-
-              const folderItems = [
-                {
-                  image: article.image,
-                  title: article.title,
-                  alt: article.title
-                },
-                extras[0],
-                extras[1]
-              ];
-
-              return (
-                <StaggerItem key={article.id}>
-                  <article className="folder-article-card glass gb">
-                    <div className="folder-stage-container">
-                      <Folder
-                        label={article.category}
-                        mode="flap"
-                        variant="glass"
-                        color={folderColors[idx % folderColors.length]}
-                        size={1.05}
-                        items={folderItems}
-                        onItemClick={() => navigate('/article')}
-                      />
-                    </div>
+            {blogData.slice(0, 3).map((article, idx) => (
+              <StaggerItem key={article.id}>
+                <article className="folder-article-card glass gb">
+                  <div className="folder-stage-container">
+                    <Folder
+                      label={article.category}
+                      mode="flap"
+                      variant="solid"
+                      color={FOLDER_COLORS[idx % FOLDER_COLORS.length]}
+                      size={1.05}
+                      items={PREPARED_FOLDER_ITEMS[idx]}
+                      onItemClick={() => navigate('/article')}
+                    />
+                  </div>
                     <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                       <small>
                         <b>{article.category}</b> &middot; {article.date} &middot; {article.readTime}
@@ -431,8 +433,7 @@ export default function HomePage() {
                     </div>
                   </article>
                 </StaggerItem>
-              );
-            })}
+            ))}
           </StaggerContainer>
 
           <p className="note" style={{ marginTop: '32px' }}>
