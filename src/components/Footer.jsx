@@ -1,9 +1,78 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const wrapperRef = useRef(null);
+  const trackRef = useRef(null);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    const track = trackRef.current;
+    if (!wrapper || !track) return undefined;
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return undefined;
+
+    let inView = false;
+    let rafId = 0;
+
+    const update = () => {
+      rafId = 0;
+      if (!inView || !track || !wrapper) return;
+      const rect = wrapper.getBoundingClientRect();
+      const h = window.innerHeight || 800;
+      const p = Math.min(1, Math.max(0, (h - rect.top) / (h + rect.height)));
+      const maxShift = Math.max(0, track.scrollWidth - window.innerWidth);
+      track.style.transform = `translate3d(${-p * maxShift}px, 0, 0)`;
+    };
+
+    const requestUpdate = () => {
+      if (!inView) return;
+      if (!rafId) {
+        rafId = requestAnimationFrame(update);
+      }
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        if (inView) {
+          update();
+        }
+      },
+      { threshold: 0 }
+    );
+    io.observe(wrapper);
+
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate, { passive: true });
+
+    // Also bind directly to global Lenis instance for seamless smooth scroll response
+    let lenisBound = false;
+    const bindLenis = () => {
+      if (window.__lenis && !lenisBound) {
+        window.__lenis.on('scroll', requestUpdate);
+        lenisBound = true;
+      }
+    };
+    bindLenis();
+    const lenisTimer = setTimeout(bindLenis, 300);
+
+    return () => {
+      clearTimeout(lenisTimer);
+      io.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+      if (window.__lenis && lenisBound && typeof window.__lenis.off === 'function') {
+        window.__lenis.off('scroll', requestUpdate);
+      }
+    };
+  }, []);
 
   const handleSubscribe = (e) => {
     e.preventDefault();
@@ -14,8 +83,14 @@ export default function Footer() {
 
   return (
     <>
-      <div className="big" aria-hidden="true">
-        <div id="big">
+      <div className="big" aria-hidden="true" ref={wrapperRef}>
+        <div id="big" ref={trackRef}>
+          <span>Let's build</span>
+          <span>something</span>
+          <span>great</span>
+          <span>Let's build</span>
+          <span>something</span>
+          <span>great</span>
           <span>Let's build</span>
           <span>something</span>
           <span>great</span>
